@@ -1,0 +1,144 @@
+#!/usr/bin/env bash
+#
+#/ Commander is a quickstart for adding flags, actions and documentation to your BASH scripts.
+#/
+#/ Usage: commander [OPTIONS] [ACTIONS [OPTIONS]]
+#/
+#/ OPTIONS:
+#/
+#/   General options:
+#/
+#/       -h, -?, --help                   - Print this help text and exit
+#/       -v, --version                    - Print program version and exit
+#/
+#/ TOOLS:
+#/ 
+#
+# commander is under a MIT style licence.
+# See LICENSE.md for the full text.
+#
+# This is open source! Please feel free to contribute.
+#
+# https://github.com/jnbdz/shell-quickstart/
+
+commander() (
+    local VERSION lib ACTION_CALL params ACTION_LIST ACTION
+
+    ### NEED TO REMOVE ACTION_LIST
+
+    VERSION="1.0.0"
+
+    ACTION_CALL=false
+    params=()
+    if [[ $# -gt 0 ]]; then
+        for arg in "$@"; do
+            case "$arg" in
+                -h|--h|--he|--hel|--help|--\?|-\?)
+                    if [ "${ACTION_CALL}" = false ]; then
+                        echoHelp 
+                        exit 0
+                    
+                    # For when an ACTION is using the help option
+                    elif [ "${ACTION_CALL}" = true ]; then
+                        params=(${params[@]+"${params[@]}"} "$arg")
+                    fi
+                    ;;
+                
+                -v|--version)
+                    if [ "${ACTION_CALL}" = false ]; then
+                        echo ${VERSION}
+                        exit 0
+                    
+                    # For when an ACTION is using the version option
+                    elif [ "${ACTION_CALL}" = true ]; then
+                        params=(${params[@]+"${params[@]}"} "$arg")
+                    fi
+                    ;;
+
+                *)
+                    if [[ "${ACTION_CALL}" = false && \
+                            ${ACTION_LIST} = *"${arg} "* ]]; then
+                        ACTION_CALL=true
+                    elif [[ "${ACTION_CALL}" = false && \
+                            ${ACTION_LIST} != *"${arg} "* && \
+                            ${arg} != *"--"* && \
+                            ${arg} != *"-"* ]]; then
+                        errorMsg "You are using an action that doesn't exist."
+                        exit 1;
+                    elif [[ "${ACTION_CALL}" = false && \
+                            ( ${arg} = *"--"* || ${arg} = *"-"* ) ]]; then
+                        errorMsg "You added options before the action."
+                        exit 1;
+                    elif [[ "${ACTION_CALL}" = true && \
+                            ${ACTION_LIST} = *"${arg} "* ]]; then
+                        errorMsg "You cannot use multiple actions."
+                        exit 1;
+                    elif [[ "${ACTION_CALL}" = true && \
+                            ${ACTION_LIST} != *"${arg} "* && \
+                            ${arg} != *"--"* && \
+                            ${arg} != *"-"* ]]; then
+                        errorMsg "You have a valid action and something that looks like an action..."
+                        exit 1;
+                    fi
+
+                    if [[ "${ACTION_CALL}" = true ]];then
+                        # Every arg that is not a flag or a option should be a file
+                        params=(${params[@]+"${params[@]}"} "$arg")
+                    fi
+                    ;;
+            esac
+        done
+    fi
+
+    TOOL_NAME=${params}
+    ACTION=${params[@]+"${params[@]}"}
+
+    if [[ -z ${ACTION} ]]; then
+        echoHelp 
+        exit 0;
+    fi
+
+    source ${LIB_DIR_PATH}"/tools/"${ACTION}
+)
+
+echoHelp() {
+    local HELP_DOC_FILE_PATH=${0}
+    if [[ "${ACTION_CALL}" = true ]];then
+        HELP_DOC_FILE_PATH=${LIB_DIR_PATH}"/tools/"${TOOL_NAME}
+    fi
+    grep '^#/' "${HELP_DOC_FILE_PATH}" | cut -c 4-
+}
+
+# Source: https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo-in-linux
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# $1 - Message
+errorMsg() {
+    echo -e " > - ${RED}ERROR${NC} - "${1}
+}
+
+# $1 - Message
+warningMsg() {
+    echo -e " > - ${YELLOW}WARNING${NC} - "${1}
+}
+
+# $1 - Message
+successMsg() {
+    echo -e " > - ${GREEN}SUCCESS${NC} - "${1}
+}
+
+# $1 - Message
+simpleMsg() {
+    echo -e " > "${1}
+}
+
+# If sourced, load all functions.
+# If executed, perform the actions as expected.
+if [[ "$0" == "${BASH_SOURCE[0]}" ]] || [[ -z "${BASH_SOURCE[0]}" ]]; then
+    commander "$@"
+fi
+
+exit 0
