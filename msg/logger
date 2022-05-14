@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+declare -g propolis_logs_path="/var/logs/propolis/"
+
+if [ ! -d "${propolis_logs_path}" ]; then
+    mkdir -p "${propolis_logs_path}"
+fi
+
+__log_message() {
+    local log_level message log_file
+    log_level="${1}"
+    tool_name="${2}"
+    message="${3}"
+    log_file="$(date '+%Y%m%d').log"
+    if [ ! -f ${propolis_logs_path} ]; then
+        touch "${propolis_logs_path}${log_file}"
+    fi
+    log_message="$(date '+%Y-%m-%d %H:%M:%S') ${log_level} - propolis:${tool_name}:${LINENO} - ${message}"
+    echo -e "${log_message}" >> "${propolis_logs_path}${log_file}"
+}
+
+log_debug() {
+    __log_message "DEBUG" "${1}" "${2}"
+}
+
+log_info() {
+    __log_message "INFO " "${1}" "${2}"
+}
+
+log_warn() {
+    __log_message "WARN " "${1}" "${2}"
+}
+
+log_error() {
+    __log_message "ERROR" "${1}" "${2}"
+}
+
+log_fatal() {
+    __log_message "FATAL" "${1}" "${2}"
+}
+
+exit 0
