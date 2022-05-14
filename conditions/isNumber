@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Test if it is a number
+# Source: https://stackoverflow.com/questions/806906/how-do-i-test-if-a-variable-is-a-number-in-bash
+# $1 - The value to test
+isNumber() {
+    re='^[0-9]+$'
+    if ! [[ ${1} =~ ${re} ]] ; then
+	echo " > Not a number"
+	return
+        #return false
+    fi
+
+    echo " > A number"
+    #return true
+}
+isNumber ${1}
+
+exit 0

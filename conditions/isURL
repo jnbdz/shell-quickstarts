@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+# Test if URL
+# Source: https://stackoverflow.com/questions/3183444/check-for-valid-link-url
+# $1 - The value to test
+isURL() {
+    local regex='^(https?|ftp|file)://[-A-Za-z0-9\+&@#/%?=~_|!:,.;]*[-A-Za-z0-9\+&@#/%=~_|]$'
+
+    if [[ ${1} =~ ${regex} ]]; then
+	echo " > A URL"
+        #return true
+    else
+	echo " > Not a URL"
+        #return false
+    fi
+}
+isURL ${1}
+
+exit 0

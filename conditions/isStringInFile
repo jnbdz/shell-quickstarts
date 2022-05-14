@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+
+# Test if string is found inside a text file
+# 1 - String to test against the file
+# 2 - File path of which to test
+isStringInFile() {
+    grep -F ${1} ${2}
+}
+isStringInFile ${1} ${2}
+
+exit 0
