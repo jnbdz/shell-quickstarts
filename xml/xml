@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+readDom() {
+    local IFS=\>
+    read -d \< ENTITY CONTENT
+    local RET=$?
+    TAG_NAME=${ENTITY%% *}
+    ATTRIBUTES=${ENTITY#* }
+    return $RET
+}
+
+# $1 - XML content
+# $2 - Function name of the XML parser
+xmlScan() {
+    ${1} | while readDom; do
+        $(${2})
+    done
+}
+
+# $1 - Path of the XML file
+# $2 - Function name of the XML parser
+xmlScanWithFilePath() {
+    xmlScan $(echoFileContent ${1}) ${2}
+}
+
+exit 0
