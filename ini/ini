@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+# Simple ini parser
+#
+# $1 - INI content
+# $2 - Section callback function name ($1 - Section name & $2 - Line)
+# $3 - Property callback function name ($1 - Key & $2 - Value & $3 - Line)
+iniParser() {
+    local content sectionCallback propertyCallback reSec reNV line
+    content=${1}
+    sectionCallback=${2}
+    propertyCallback=${3}
+    reSec='^\[(.*)\]$'
+    #local reNV='[ ]*([^ ]*)+[ ]*=(.*)'     #Remove only spaces around names
+    reNV='[ ]*([^ ]*)+[ ]*=[ ]*(.*)'  #Remove spaces around name and spaces before value
+
+    while read -r line; do
+        if [[ ${line} =~ $reSec ]]; then
+            # ${BASH_REMATCH[1]} - Section name
+            # ${line} - The whole line
+            $(${sectionCallback} ${BASH_REMATCH[1]} ${line})
+        elif [[ ${line} =~ $reNV ]]; then
+            # ${BASH_REMATCH[1]} - Key
+            # ${BASH_REMATCH[2]} - Value
+            # ${line} - The whole line
+            $(${propertyCallback} ${BASH_REMATCH[1]} ${BASH_REMATCH[2]} ${line})
+        fi
+    done <<< "${content}"
+}
+
+# $1 - Path of the INI file
+# $2 - Section callback function name ($1 - Section name & $2 - Line)
+# $3 - Property callback function name ($1 - Key & $2 - Value & $3 - Line)
+iniParserWithFilePath() {
+    iniParser $(echoFileContent ${1}) ${2} ${3}
+}
+
+exit 0
