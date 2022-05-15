@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+echo ${@} | sort -nr | head -n1
